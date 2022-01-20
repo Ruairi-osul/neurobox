@@ -76,8 +76,8 @@ def align_to_events(
 
     def _align_around_one_group(df1, df2):
         df1[returned_colname] = binit.align_around(
-            df1[df_data_time_col],
-            df2[df_events_timestamp_col],
+            df1[df_data_time_col].values,
+            df2[df_events_timestamp_col].values,
             t_before=time_before_event,
             max_latency=max_latency,
         )
@@ -102,7 +102,7 @@ def get_closest_event(
     df_events_group_colname: str = "group",
     df_events_timestamp_col: str = "time",
     df_data_time_col: str = "time",
-    returned_colname: str = "algined",
+    returned_colname: str = "event",
 ) -> pd.DataFrame:
     """For each row in a DF, get the event it is closest to. Closest refers to most recent previous event (though see time_before)
 
@@ -127,8 +127,8 @@ def get_closest_event(
             df1[df_data_time_col],
             df2[df_events_timestamp_col],
             nan_vals_before_first_bin=nan_vals_before_first_bin,
-            t_before=time_before_event,
-            max_latency=max_latency,
+            time_before_event=time_before_event,
+            time_after=max_latency,
         )
         return df1
 
@@ -140,3 +140,51 @@ def get_closest_event(
         df2_group_colname=df_events_group_colname,
     )
 
+
+def get_closest_event_idx(
+    df_data: pd.DataFrame,
+    df_events: pd.DataFrame,
+    time_before_event: Optional[float] = None,
+    max_latency: Optional[float] = None,
+    nan_vals_before_first_bin: bool = True,
+    df_data_group_colname: str = "group",
+    df_events_group_colname: str = "group",
+    df_events_timestamp_col: str = "time",
+    df_data_time_col: str = "time",
+    returned_colname: str = "event_index",
+) -> pd.DataFrame:
+    """For each row in a DF, get the event it is closest to. Closest refers to most recent previous event (though see time_before)
+
+    Args:
+        df_data (pd.DataFrame): DF containing data to be aligned
+        df_events (pd.DataFrame): DF containing events to align to
+        time_before_event (Optional[float], optional): If specified, events occuring this latency BEFORE an event will be aligned to that event. Defaults to None.
+        max_latency (Optional[float], optional): Data occuring this latency after the last bin are returned as NaN. Defaults to None.
+        nan_vals_before_first_bin (bool, optional): If True, returns np.nan for values of input timestamps occuring before the after the first bin. Defaults to False.
+        df_data_group_colname (str, optional): Group col name in df_data. Defaults to "group".
+        df_events_group_colname (str, optional): Group col name in df_events. Defaults to "group".
+        df_events_timestamp_col (str, optional): Timestamp column in df_events. Defaults to "time".
+        df_data_time_col (str, optional): Time column in df_data. Defaults to "time".
+        returned_colname (str, optional): Name of the column in df_data which specifies the aligned values. Defaults to "algined".
+
+    Returns:
+        pd.DataFrame: [description]
+    """
+
+    def _closest_event_one_group(df1, df2):
+        df1[returned_colname] = binit.which_bin_idx(
+            df1[df_data_time_col],
+            df2[df_events_timestamp_col],
+            nan_vals_before_first_bin=nan_vals_before_first_bin,
+            time_before=time_before_event,
+            time_after=max_latency,
+        )
+        return df1
+
+    return groupby_two_df(
+        df1=df_data,
+        df2=df_events,
+        f=_closest_event_one_group,
+        df1_group_colname=df_data_group_colname,
+        df2_group_colname=df_events_group_colname,
+    )

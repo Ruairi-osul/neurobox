@@ -3,13 +3,14 @@ from typing import Optional, Optional, Callable
 from scipy.stats import zmap, zscore
 from scipy.ndimage import gaussian_filter1d
 
+
 def exclude_min_activity_wide(df: pd.DataFrame, threshold: float) -> pd.DataFrame:
     # TODO
     ...
 
 
 def exclude_baseline_wide(
-    df: pd.DataFrame,  baseline_before: float = 0,
+    df: pd.DataFrame, baseline_before: float = 0,
 ) -> pd.DataFrame:
     """Exclude data from baseline
 
@@ -59,6 +60,7 @@ def gaussian_smooth(df: pd.DataFrame, sigma: float) -> pd.DataFrame:
         return df
     return df.apply(gaussian_filter1d, sigma=sigma)
 
+
 def sort_by_activity_in_range(
     df: pd.DataFrame, t_start: float, t_stop: float, agg_func: Callable,
 ) -> pd.DataFrame:
@@ -81,10 +83,8 @@ def sort_by_activity_in_range(
     )
     return df[idx]
 
-def resample(
-    df: pd.DataFrame,
-    new_interval: str,
-) -> pd.DataFrame:
+
+def resample(df: pd.DataFrame, new_interval: str,) -> pd.DataFrame:
     """Resample a dataset. Works best if in long format
 
     Args:
@@ -105,6 +105,7 @@ def resample(
         .assign(time=lambda x: x["time"].dt.total_seconds())
         .set_index("time")
     )
+
 
 def exclude_after(df: pd.DataFrame, max_time: float):
     ...
