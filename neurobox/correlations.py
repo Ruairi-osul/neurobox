@@ -4,6 +4,7 @@ from typing import Optional
 from itertools import combinations
 from .utils import create_combined_col
 
+
 def pairwise_correlation(
     df: pd.DataFrame,
     rectify: bool = False,
@@ -23,14 +24,13 @@ def pairwise_correlation(
     """
     if fillna is not None:
         df = df.fillna(fillna)
-    res = np.corrcoef(df)
+    res = df.corr()
     if rectify:
-        res = np.where(res < 0, 0, res)
+        res = res.where(res >= 0, 0)
     if zero_diag:
-        np.fill_diagonal(res, 0)
-    df = pd.DataFrame(res, columns=df.index.values)
-    df.index = df.columns
-    return df
+        np.fill_diagonal(res.values, 0)
+    return res
+
 
 def correlation_matrix_to_tidy(df: pd.DataFrame) -> pd.DataFrame:
     """Convert a correlation matrix df to one with one row per neuron combination
