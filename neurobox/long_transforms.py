@@ -84,7 +84,7 @@ def align_to_events(
         return df1
 
     return groupby_two_df(
-        df1=df_data,
+        df1=df_data.copy(),
         df2=df_events,
         f=_align_around_one_group,
         df1_group_colname=df_data_group_colname,

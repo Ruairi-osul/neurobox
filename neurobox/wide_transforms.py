@@ -1,5 +1,5 @@
 import pandas as pd
-from typing import Optional, Optional, Callable
+from typing import List, Optional, Optional, Callable
 from scipy.stats import zmap, zscore
 from scipy.ndimage import gaussian_filter1d
 
@@ -84,20 +84,23 @@ def sort_by_activity_in_range(
     return df[idx]
 
 
-def resample(df: pd.DataFrame, new_interval: str,) -> pd.DataFrame:
+def resample(df: pd.DataFrame, new_interval: str, grouping_cols: Optional[List[str]]=None, floor: bool = True) -> pd.DataFrame:
     """Resample a dataset. Works best if in long format
 
     Args:
         df (pd.DataFrame): DataFrame containing the dataset
         new_interval (str): String code for new time interval
-        time_col (str, optional): Time column in existing dataset. Defaults to "time".
-        grouping_cols (Optional[List[str]], optional): Columns used to group by for resampling. Defaults to None.
+        floor (bool): Whether to floor index values with respect to the new interval prior to resampling
 
     Returns:
         pd.DataFrame: Resampled DF
     """
     df["time"] = pd.to_timedelta(df.index, unit="s")
     df = df.set_index("time")
+    if floor:
+        df.index = df.index.floor(new_interval)
+    if grouping_cols is not None:
+        df = df.groupby(grouping_cols)
     return (
         df.resample(new_interval)
         .mean()

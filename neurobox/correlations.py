@@ -42,9 +42,7 @@ def correlation_matrix_to_tidy(df: pd.DataFrame) -> pd.DataFrame:
         pd.DataFrame: DF with one row per neuron combination column for correlation value
     """
     df = (
-        df.reset_index()
-        .melt(id_vars="index")
-        .rename(columns={"index": "neuron_1", "variable": "neuron_2"})
+        df.rename_axis(index='foo', columns="bar").reset_index().melt(id_vars="foo").rename(columns={"foo": "neuron_1", "bar": "neuron_2"})
     )
     df = create_combined_col(
         df, c1="neuron_1", c2="neuron_2", returned_colname="neuron_combination"

@@ -19,8 +19,6 @@ def create_combined_col(
         returned_colname = f"{c1}_{c2}"
     return df.assign(
         **{
-            returned_colname: lambda x: x[c1]
-            .astype(str)
-            .str.cat(x[c2].astype(str), sep="_")
+            returned_colname: lambda x: x[c1].astype(str).str.cat(x[c2].astype(str), sep="_")
         }
     )
